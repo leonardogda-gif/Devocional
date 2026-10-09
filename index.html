@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#1d3c96">
+<title>Devocionais Kids</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@500;600&family=Fjalla+One&family=Amatic+SC:wght@700&family=Patrick+Hand+SC&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --azul:#1d3c96; --azul-esc:#142c70; --verde:#3cc93c; --verde-esc:#2aa52a;
+  --laranja:#e8731f; --bg:#eef2fb; --card:#fff; --txt:#1c2440; --muted:#6b7591; --borda:#dbe1f0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:"Nunito",system-ui,sans-serif}
+header{background:var(--azul);color:#fff;padding:14px 16px 12px;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+header h1{margin:0;font-size:20px;font-weight:900;letter-spacing:.3px}
+header h1 span{color:var(--verde)}
+header p{margin:2px 0 0;font-size:12px;opacity:.8}
+main{max-width:560px;margin:0 auto;padding:12px 16px 120px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:2px solid var(--borda);background:#fff;color:var(--txt);border-radius:999px;padding:7px 13px;font:800 14px "Nunito";position:relative;cursor:pointer}
+.tab.on{background:var(--verde);border-color:var(--verde);color:#fff}
+.tab .dot{position:absolute;top:-3px;right:-3px;width:11px;height:11px;border-radius:50%;background:var(--laranja);border:2px solid #fff;display:none}
+.tab.temimg .dot{display:block;background:var(--azul)}
+.tab.pronto .dot{display:block;background:var(--verde-esc)}
+.card{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(20,40,100,.08)}
+.card h2{margin:0 0 10px;font-size:15px;font-weight:900;color:var(--azul);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:none;border-radius:12px;padding:11px 14px;font:800 14px "Nunito";cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.prim{background:var(--verde);color:#fff}
+.btn.azul{background:var(--azul);color:#fff}
+.btn.sec{background:#e7ecf8;color:var(--azul)}
+.btn.lar{background:var(--laranja);color:#fff}
+.btn.peq{padding:7px 10px;font-size:12px;border-radius:9px}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.grow{flex:1}
+.stage{position:relative;width:100%;border-radius:12px;overflow:hidden;background:#d9dfee;touch-action:none;user-select:none;-webkit-user-select:none}
+.stage canvas{display:block;width:100%;height:auto}
+.vazio{aspect-ratio:4/5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);text-align:center;padding:20px;font-weight:700}
+.vazio .ico{font-size:42px}
+.layer{position:absolute;inset:0}
+.box{position:absolute;border:2px dashed rgba(29,60,150,.55);border-radius:6px;background:rgba(255,255,255,.04);touch-action:none;cursor:move}
+.box .tag{position:absolute;top:-20px;left:-2px;background:rgba(29,60,150,.8);color:#fff;font:800 10px "Nunito";padding:2px 6px;border-radius:5px;white-space:nowrap;pointer-events:none}
+.box.sel{border:2px solid var(--laranja);background:rgba(232,115,31,.08)}
+.box.sel .tag{background:var(--laranja)}
+.box .handle{position:absolute;right:-12px;bottom:-12px;width:26px;height:26px;border-radius:50%;background:var(--laranja);border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3);display:none;cursor:nwse-resize}
+.box.sel .handle{display:block}
+.layer.oculto .box{border-color:transparent;background:transparent}
+.layer.oculto .box .tag{display:none}
+.dica{font-size:12px;color:var(--muted);margin:8px 2px 0;line-height:1.4}
+label.campo{display:block;font-size:13px;font-weight:800;margin:10px 0 5px;color:var(--txt)}
+label.campo:first-of-type{margin-top:0}
+textarea,select,input[type=text]{width:100%;border:2px solid var(--borda);border-radius:12px;padding:10px 12px;font:600 15px "Nunito";color:var(--txt);background:#fbfcff;resize:vertical}
+textarea:focus,select:focus{outline:none;border-color:var(--verde)}
+textarea.ativo{border-color:var(--laranja)}
+.ctrl{display:grid;grid-template-columns:86px 1fr;align-items:center;gap:10px 10px;margin-top:4px}
+.ctrl span{font-size:13px;font-weight:800}
+input[type=range]{width:100%;accent-color:var(--laranja)}
+.cores{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cor{width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--borda);cursor:pointer}
+.cor.on{box-shadow:0 0 0 3px var(--laranja)}
+input[type=color]{width:34px;height:34px;border:none;padding:0;background:none}
+.seg{display:flex;background:#e7ecf8;border-radius:10px;padding:3px}
+.seg button{flex:1;border:none;background:none;padding:7px;border-radius:8px;font:800 13px "Nunito";color:var(--azul);cursor:pointer}
+.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.semsel{font-size:13px;color:var(--muted);font-weight:700;padding:6px 0}
+.check{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;margin-top:10px}
+.check input{width:20px;height:20px;accent-color:var(--verde)}
+.barra{position:fixed;left:0;right:0;bottom:0;background:#fff;box-shadow:0 -2px 12px rgba(20,40,100,.15);padding:10px 16px calc(10px + env(safe-area-inset-bottom));z-index:30}
+.barra .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.barra .btn{width:100%;padding:12px 8px}
+.barra small{display:block;font-size:10px;font-weight:700;opacity:.85}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:var(--txt);color:#fff;padding:10px 16px;border-radius:12px;font-weight:800;font-size:14px;opacity:0;transition:.25s;z-index:50;pointer-events:none;max-width:90%;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hidden{display:none!important}
+details summary{cursor:pointer;font-weight:900;color:var(--azul);font-size:15px;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:" ▾";color:var(--muted)}
+details[open] summary::after{content:" ▴"}
+</style>
+</head>
+<body>
+<header>
+  <h1>Devocionais <span>Kids</span></h1>
+  <p>Suba a arte do dia, escreva o texto e compartilhe</p>
+</header>
+
+<main>
+  <div class="tabs" id="tabs"></div>
+
+  <!-- PRÉVIA -->
+  <div class="card">
+    <h2><span id="tituloDia">Segunda</span>
+      <span class="row">
+        <label class="btn sec peq" for="upDia">🖼️ <span id="txtUp">Subir arte</span></label>
+        <button class="btn sec peq hidden" id="btnRemover" title="Remover arte">🗑️</button>
+      </span>
+    </h2>
+    <input type="file" id="upDia" accept="image/*" class="hidden">
+    <div class="stage" id="stage">
+      <div class="vazio" id="vazio">
+        <div class="ico">🖼️</div>
+        <div>Suba a arte de <b id="vazioDia">Segunda</b><br><small>(arte pronta, sem os textos)</small></div>
+        <label class="btn prim" for="upDia">Escolher imagem</label>
+      </div>
+      <canvas id="cv" class="hidden"></canvas>
+      <div class="layer hidden" id="layer"></div>
+    </div>
+    <p class="dica" id="dicaArrastar">Toque numa caixa para selecionar. Arraste para mover e use a bolinha laranja para redimensionar. O texto diminui sozinho se não couber.</p>
+    <label class="check"><input type="checkbox" id="mostrarCaixas" checked> Mostrar contornos das caixas</label>
+  </div>
+
+  <!-- TEXTOS -->
+  <div class="card">
+    <h2>Textos do dia</h2>
+    <div id="campos"></div>
+  </div>
+
+  <!-- AJUSTE DA CAIXA -->
+  <div class="card">
+    <h2>Ajustar caixa <span id="nomeSel" style="color:var(--laranja);font-size:13px"></span></h2>
+    <div class="semsel" id="semSel">Toque numa caixa da imagem ou num campo de texto para ajustar.</div>
+    <div id="painelSel" class="hidden">
+      <div class="ctrl">
+        <span>Tamanho</span><input type="range" id="rSize" min="0.012" max="0.09" step="0.001">
+        <span>Rotação</span><input type="range" id="rRot" min="-20" max="20" step="0.5">
+        <span>Alinhar</span>
+        <div class="seg" id="segAlign">
+          <button data-a="left">Esquerda</button><button data-a="center">Centro</button><button data-a="right">Direita</button>
+        </div>
+        <span>Cor</span>
+        <div class="cores" id="cores"></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn sec peq grow" id="btnCopiarTodos">📋 Usar estas posições em todos os dias</button>
+      <button class="btn sec peq" id="btnPadrao">↺ Padrão</button>
+    </div>
+  </div>
+
+  <!-- CONFIGURAÇÕES -->
+  <div class="card">
+    <details>
+      <summary>Semana e configurações</summary>
+      <label class="campo" style="margin-top:14px">Fonte dos textos</label>
+      <select id="selFonte"></select>
+      <label class="check"><input type="checkbox" id="chkUpper"> Tudo em MAIÚSCULAS</label>
+      <label class="campo" style="margin-top:16px">Subir a semana inteira de uma vez</label>
+      <p class="dica" style="margin-top:0">Selecione as artes na ordem: Segunda, Terça, Quarta…</p>
+      <label class="btn azul" for="upSemana" style="margin-top:8px">🗂️ Subir várias artes</label>
+      <input type="file" id="upSemana" accept="image/*" multiple class="hidden">
+      <div class="row" style="margin-top:16px">
+        <button class="btn sec peq grow" id="btnLimparTextos">🧹 Nova semana (apagar textos)</button>
+        <button class="btn sec peq grow" id="btnLimparArtes">🗑️ Apagar todas as artes</button>
+      </div>
+    </details>
+  </div>
+</main>
+
+<div class="barra">
+  <div class="in">
+    <button class="btn prim" id="btnFeed">📲 Feed / WhatsApp<small>1080 × 1350</small></button>
+    <button class="btn lar" id="btnStories">⭐ Stories / Status<small>1080 × 1920</small></button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== CONFIG ===================== */
+const DAYS = [['seg','Segunda'],['ter','Terça'],['qua','Quarta'],['qui','Quinta'],['sex','Sexta'],['sab','Sábado'],['dom','Domingo']];
+const FIELDS = [
+  {k:'ref',   label:'Referência bíblica',       tag:'Referência', ph:'Ex.: Filipenses 2:3', rows:1},
+  {k:'verso', label:'Versículo',                tag:'Versículo',  ph:'Ex.: "Nada façais por partidarismo ou vanglória..."', rows:4},
+  {k:'exp',   label:'Explicação (balão verde)', tag:'Explicação', ph:'Ex.: Não buscar reconhecimento em tudo que fazemos...', rows:3},
+  {k:'prat',  label:'Praticando',               tag:'Praticando', ph:'Ex.: Reflita, estou fazendo isso para servir ou para ser reconhecida?', rows:3},
+];
+const DEFAULT_BOXES = {
+  ref:   {x:.19, y:.195, w:.31, h:.045, size:.034, color:'#e0661f', align:'center', rot:0},
+  verso: {x:.11, y:.245, w:.38, h:.165, size:.028, color:'#1b1b1b', align:'left',   rot:0},
+  exp:   {x:.45, y:.335, w:.45, h:.135, size:.033, color:'#ffffff', align:'left',   rot:0},
+  prat:  {x:.12, y:.595, w:.26, h:.19,  size:.035, color:'#1b1b1b', align:'center', rot:-4},
+};
+const FONTS = {
+  'Bebas Neue':{w:400, lh:1.08},
+  'Oswald':{w:600, lh:1.15},
+  'Fjalla One':{w:400, lh:1.15},
+  'Amatic SC':{w:700, lh:1.0},
+  'Patrick Hand SC':{w:400, lh:1.12},
+  'Nunito':{w:800, lh:1.18},
+};
+const SWATCHES = ['#1b1b1b','#ffffff','#e0661f','#3cc93c','#1d3c96'];
+const LS_KEY = 'devocionais-kids-v1';
+
+/* ===================== ESTADO ===================== */
+const clone = o => JSON.parse(JSON.stringify(o));
+let state = { font:'Bebas Neue', upper:true, cur:'seg', days:{} };
+try { const s = JSON.parse(localStorage.getItem(LS_KEY)); if (s && s.days) state = Object.assign(state, s); } catch(e) {}
+function save(){ try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e) {} }
+function day(d = state.cur){
+  if (!state.days[d]) state.days[d] = { texts:{}, boxes:clone(DEFAULT_BOXES) };
+  const dd = state.days[d];
+  for (const f of FIELDS) if (!dd.boxes[f.k]) dd.boxes[f.k] = clone(DEFAULT_BOXES[f.k]);
+  return dd;
+}
+let selected = null;
+const imgs = {};
+
+/* ===================== INDEXEDDB (artes) ===================== */
+let dbp;
+function idb(){
+  if (!dbp) dbp = new Promise((res, rej) => {
+    const r = indexedDB.open('devocionais-kids', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('bases');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+  return dbp;
+}
+async function idbGet(k){ try{ const db = await idb(); return await new Promise(res => { const q = db.transaction('bases').objectStore('bases').get(k); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); }catch(e){ return null; } }
+async function idbSet(k, v){ try{ const db = await idb(); await new Promise(res => { const tx = db.transaction('bases','readwrite'); const st = tx.objectStore('bases'); v == null ? st.delete(k) : st.put(v, k); tx.oncomplete = res; tx.onerror = res; }); }catch(e){} }
+
+function blobToImg(blob){
+  return new Promise((res, rej) => { const url = URL.createObjectURL(blob); const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url; });
+}
+async function loadAllImages(){
+  for (const [k] of DAYS){ const b = await idbGet(k); if (b) { try { imgs[k] = await blobToImg(b); } catch(e) {} } }
+}
+
+/* ===================== DESENHO ===================== */
+const $ = id => document.getElementById(id);
+const cv = $('cv'), ctx = cv.getContext('2d');
+
+function fontSpec(px){ const f = FONTS[state.font] || {w:400}; return `${f.w} ${px}px "${state.font}", sans-serif`; }
+function lineH(){ return (FONTS[state.font] || {lh:1.12}).lh; }
+
+function wrap(c, text, maxW){
+  const out = [];
+  for (const para of text.split('\n')){
+    const words = para.split(/\s+/).filter(Boolean);
+    if (!words.length){ out.push(''); continue; }
+    let line = words[0];
+    for (let i = 1; i < words.length; i++){
+      const test = line + ' ' + words[i];
+      if (c.measureText(test).width <= maxW) line = test; else { out.push(line); line = words[i]; }
+    }
+    out.push(line);
+  }
+  return out;
+}
+
+function drawBox(c, text, b, W, H){
+  if (state.upper) text = text.toLocaleUpperCase('pt-BR');
+  const bw = b.w * W, bh = b.h * H;
+  let size = b.size * W, lines;
+  for (let i = 0; i < 80; i++){
+    c.font = fontSpec(size);
+    lines = wrap(c, text, bw);
+    const maxLine = Math.max(...lines.map(l => c.measureText(l).width));
+    if ((lines.length * size * lineH() <= bh && maxLine <= bw) || size < 6) break;
+    size *= 0.95;
+  }
+  c.save();
+  c.translate((b.x + b.w/2) * W, (b.y + b.h/2) * H);
+  c.rotate(b.rot * Math.PI / 180);
+  c.fillStyle = b.color;
+  c.textBaseline = 'middle';
+  c.textAlign = b.align;
+  const lh = size * lineH();
+  let y = -(lines.length * lh)/2 + lh/2;
+  const x = b.align === 'left' ? -bw/2 : b.align === 'right' ? bw/2 : 0;
+  for (const l of lines){ c.fillText(l, x, y); y += lh; }
+  c.restore();
+}
+
+function render(c, img, d, W, H){
+  c.clearRect(0, 0, W, H);
+  c.drawImage(img, 0, 0, W, H);
+  const dd = day(d);
+  for (const f of FIELDS){
+    const t = (dd.texts[f.k] || '').trim();
+    if (t) drawBox(c, t, dd.boxes[f.k], W, H);
+  }
+}
+
+let raf = 0;
+function redraw(){
+  if (raf) return;
+  raf = requestAnimationFrame(() => {
+    raf = 0;
+    const img = imgs[state.cur];
+    if (!img) return;
+    const W = 1080, H = Math.round(W * img.naturalHeight / img.naturalWidth);
+    if (cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
+    render(ctx, img, state.cur, W, H);
+  });
+}
+
+/* ===================== CAIXAS ARRASTÁVEIS ===================== */
+const layer = $('layer');
+function buildBoxes(){
+  layer.innerHTML = '';
+  for (const f of FIELDS){
+    const el = document.createElement('div');
+    el.className = 'box'; el.dataset.k = f.k;
+    el.innerHTML = `<div class="tag">${f.tag}</div><div class="handle"></div>`;
+    layer.appendChild(el);
+  }
+  positionBoxes();
+}
+function positionBoxes(){
+  const dd = day();
+  layer.querySelectorAll('.box').forEach(el => {
+    const b = dd.boxes[el.dataset.k];
+    el.style.left = (b.x*100)+'%'; el.style.top = (b.y*100)+'%';
+    el.style.width = (b.w*100)+'%'; el.style.height = (b.h*100)+'%';
+    el.style.transform = `rotate(${b.rot}deg)`;
+    el.classList.toggle('sel', el.dataset.k === selected);
+  });
+}
+
+let drag = null;
+layer.addEventListener('pointerdown', e => {
+  const el = e.target.closest('.box');
+  if (!el){ select(null); return; }
+  const k = el.dataset.k;
+  select(k);
+  const r = layer.getBoundingClientRect();
+  drag = { k, mode: e.target.classList.contains('handle') ? 'resize' : 'move', sx:e.clientX, sy:e.clientY, ob:{...day().boxes[k]}, rw:r.width, rh:r.height };
+  try { el.setPointerCapture(e.pointerId); } catch(_) {}
+  e.preventDefault();
+});
+layer.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const dx = (e.clientX - drag.sx) / drag.rw, dy = (e.clientY - drag.sy) / drag.rh;
+  const b = day().boxes[drag.k], o = drag.ob;
+  if (drag.mode === 'move'){
+    b.x = Math.min(1 - .03, Math.max(-o.w + .03, o.x + dx));
+    b.y = Math.min(1 - .02, Math.max(-o.h + .02, o.y + dy));
+  } else {
+    b.w = Math.max(.06, Math.min(1.2, o.w + dx));
+    b.h = Math.max(.025, Math.min(1.2, o.h + dy));
+  }
+  positionBoxes(); redraw();
+});
+const endDrag = () => { if (drag){ drag = null; save(); } };
+layer.addEventListener('pointerup', endDrag);
+layer.addEventListener('pointercancel', endDrag);
+
+/* ===================== SELEÇÃO E PAINEL ===================== */
+function select(k){
+  selected = k;
+  positionBoxes();
+  document.querySelectorAll('#campos textarea').forEach(t => t.classList.toggle('ativo', t.dataset.k === k));
+  $('painelSel').classList.toggle('hidden', !k);
+  $('semSel').classList.toggle('hidden', !!k);
+  $('nomeSel').textContent = k ? FIELDS.find(f => f.k === k).tag : '';
+  if (k) syncPanel();
+}
+function syncPanel(){
+  const b = day().boxes[selected];
+  $('rSize').value = b.size; $('rRot').value = b.rot;
+  $('segAlign').querySelectorAll('button').forEach(bt => bt.classList.toggle('on', bt.dataset.a === b.align));
+  $('cores').querySelectorAll('.cor').forEach(c => c.classList.toggle('on', c.dataset.c.toLowerCase() === b.color.toLowerCase()));
+  $('corLivre').value = b.color;
+}
+function setProp(p, v){ if (!selected) return; day().boxes[selected][p] = v; positionBoxes(); syncPanel(); redraw(); save(); }
+
+$('rSize').addEventListener('input', e => setProp('size', +e.target.value));
+$('rRot').addEventListener('input', e => setProp('rot', +e.target.value));
+$('segAlign').addEventListener('click', e => { const a = e.target.dataset.a; if (a) setProp('align', a); });
+(function buildCores(){
+  const wrapC = $('cores');
+  for (const c of SWATCHES){ const d = document.createElement('div'); d.className = 'cor'; d.dataset.c = c; d.style.background = c; d.onclick = () => setProp('color', c); wrapC.appendChild(d); }
+  const inp = document.createElement('input'); inp.type = 'color'; inp.id = 'corLivre'; inp.title = 'Outra cor';
+  inp.addEventListener('input', e => setProp('color', e.target.value));
+  wrapC.appendChild(inp);
+})();
+
+/* ===================== CAMPOS DE TEXTO ===================== */
+function buildCampos(){
+  const box = $('campos'); box.innerHTML = '';
+  for (const f of FIELDS){
+    const lb = document.createElement('label'); lb.className = 'campo'; lb.textContent = f.label; lb.htmlFor = 't_'+f.k;
+    const ta = document.createElement('textarea'); ta.id = 't_'+f.k; ta.dataset.k = f.k; ta.rows = f.rows; ta.placeholder = f.ph;
+    ta.addEventListener('input', () => { day().texts[f.k] = ta.value; redraw(); save(); refreshTabs(); });
+    ta.addEventListener('focus', () => select(f.k));
+    box.append(lb, ta);
+  }
+}
+function fillCampos(){
+  const dd = day();
+  for (const f of FIELDS) $('t_'+f.k).value = dd.texts[f.k] || '';
+}
+
+/* ===================== DIAS ===================== */
+function dayLabel(k){ return DAYS.find(d => d[0] === k)[1]; }
+function refreshTabs(){
+  const tabs = $('tabs');
+  if (!tabs.children.length){
+    for (const [k, n] of DAYS){
+      const b = document.createElement('button'); b.className = 'tab'; b.dataset.k = k;
+      b.innerHTML = `${n}<span class="dot"></span>`;
+      b.onclick = () => switchDay(k);
+      tabs.appendChild(b);
+    }
+  }
+  tabs.querySelectorAll('.tab').forEach(b => {
+    const k = b.dataset.k, dd = state.days[k];
+    const temTexto = dd && FIELDS.some(f => (dd.texts[f.k] || '').trim());
+    b.classList.toggle('on', k === state.cur);
+    b.classList.toggle('temimg', !!imgs[k] && !temTexto);
+    b.classList.toggle('pronto', !!imgs[k] && temTexto);
+  });
+}
+function switchDay(k){
+  state.cur = k; save();
+  selected = null;
+  refreshTabs(); fillCampos(); showStage(); select(null);
+  const t = $('tabs').querySelector(`[data-k="${k}"]`); if (t) t.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
+}
+function showStage(){
+  const has = !!imgs[state.cur];
+  $('tituloDia').textContent = dayLabel(state.cur);
+  $('vazioDia').textContent = dayLabel(state.cur);
+  $('vazio').classList.toggle('hidden', has);
+  cv.classList.toggle('hidden', !has);
+  layer.classList.toggle('hidden', !has);
+  $('btnRemover').classList.toggle('hidden', !has);
+  $('txtUp').textContent = has ? 'Trocar arte' : 'Subir arte';
+  $('btnFeed').disabled = !has; $('btnStories').disabled = !has;
+  if (has){ positionBoxes(); redraw(); }
+}
+
+/* ===================== UPLOADS ===================== */
+async function setBase(k, file){
+  await idbSet(k, file);
+  imgs[k] = await blobToImg(file);
+}
+$('upDia').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  try { await setBase(state.cur, f); showStage(); refreshTabs(); toast('Arte de ' + dayLabel(state.cur) + ' salva'); }
+  catch(_) { toast('Não consegui abrir essa imagem'); }
+});
+$('upSemana').addEventListener('change', async e => {
+  const files = [...e.target.files]; e.target.value = '';
+  if (!files.length) return;
+  const n = Math.min(files.length, DAYS.length);
+  for (let i = 0; i < n; i++){ try { await setBase(DAYS[i][0], files[i]); } catch(_) {} }
+  showStage(); refreshTabs();
+  toast(`${n} arte(s) salvas de ${DAYS[0][1]} a ${DAYS[n-1][1]}`);
+});
+$('btnRemover').onclick = async () => {
+  if (!confirm('Remover a arte de ' + dayLabel(state.cur) + '?')) return;
+  await idbSet(state.cur, null); delete imgs[state.cur]; showStage(); refreshTabs();
+};
+
+/* ===================== AÇÕES DE LAYOUT ===================== */
+$('btnCopiarTodos').onclick = () => {
+  const src = clone(day().boxes);
+  for (const [k] of DAYS) day(k).boxes = clone(src);
+  save(); toast('Posições copiadas para todos os dias');
+};
+$('btnPadrao').onclick = () => {
+  if (!confirm('Voltar as caixas de ' + dayLabel(state.cur) + ' para a posição padrão?')) return;
+  day().boxes = clone(DEFAULT_BOXES); save(); positionBoxes(); redraw(); if (selected) syncPanel();
+};
+$('btnLimparTextos').onclick = () => {
+  if (!confirm('Apagar os textos de todos os dias? As artes e posições continuam salvas.')) return;
+  for (const k in state.days) state.days[k].texts = {};
+  save(); fillCampos(); redraw(); refreshTabs(); toast('Pronto para a nova semana');
+};
+$('btnLimparArtes').onclick = async () => {
+  if (!confirm('Apagar as artes de todos os dias?')) return;
+  for (const [k] of DAYS){ await idbSet(k, null); delete imgs[k]; }
+  showStage(); refreshTabs(); toast('Artes apagadas');
+};
+$('mostrarCaixas').addEventListener('change', e => layer.classList.toggle('oculto', !e.target.checked));
+
+/* ===================== FONTE ===================== */
+(function buildFontes(){
+  const s = $('selFonte');
+  for (const f in FONTS){ const o = document.createElement('option'); o.value = f; o.textContent = f; o.style.fontFamily = `"${f}"`; s.appendChild(o); }
+  s.value = state.font;
+  s.addEventListener('change', async () => { state.font = s.value; save(); await ensureFont(); redraw(); });
+  $('chkUpper').checked = state.upper;
+  $('chkUpper').addEventListener('change', e => { state.upper = e.target.checked; save(); redraw(); });
+})();
+async function ensureFont(){
+  try { await document.fonts.load(fontSpec(40)); } catch(e) {}
+}
+
+/* ===================== EXPORTAR ===================== */
+function feedCanvas(){
+  const img = imgs[state.cur];
+  const W = 1080, H = Math.round(W * img.naturalHeight / img.naturalWidth);
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  render(c.getContext('2d'), img, state.cur, W, H);
+  return c;
+}
+function storiesCanvas(){
+  const feed = feedCanvas();
+  const SW = 1080, SH = 1920;
+  const s = document.createElement('canvas'); s.width = SW; s.height = SH;
+  const c = s.getContext('2d');
+  // fundo desfocado (reduz e amplia a própria arte)
+  const tiny = document.createElement('canvas'); tiny.width = 24; tiny.height = 43;
+  const tc = tiny.getContext('2d');
+  const sc = Math.max(24 / feed.width, 43 / feed.height);
+  tc.drawImage(feed, (24 - feed.width*sc)/2, (43 - feed.height*sc)/2, feed.width*sc, feed.height*sc);
+  c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
+  c.drawImage(tiny, 0, 0, SW, SH);
+  c.fillStyle = 'rgba(0,0,0,.2)'; c.fillRect(0, 0, SW, SH);
+  // arte centralizada
+  let fw = SW, fh = feed.height * SW / feed.width;
+  if (fh > SH * .86){ fh = SH * .86; fw = feed.width * fh / feed.height; }
+  c.save(); c.shadowColor = 'rgba(0,0,0,.35)'; c.shadowBlur = 40;
+  c.drawImage(feed, (SW - fw)/2, (SH - fh)/2, fw, fh);
+  c.restore();
+  return s;
+}
+async function exportar(tipo){
+  if (!imgs[state.cur]) return;
+  await ensureFont();
+  const canvas = tipo === 'stories' ? storiesCanvas() : feedCanvas();
+  const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.93));
+  const nome = `devocional-${dayLabel(state.cur).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}-${tipo}.jpg`;
+  const file = new File([blob], nome, { type:'image/jpeg' });
+  if (navigator.canShare && navigator.canShare({ files:[file] })){
+    try { await navigator.share({ files:[file] }); return; }
+    catch(e){ if (e.name === 'AbortError') return; }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast('Imagem baixada');
+}
+$('btnFeed').onclick = () => exportar('feed');
+$('btnStories').onclick = () => exportar('stories');
+
+/* ===================== UTIL ===================== */
+let tt;
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2200); }
+
+/* ===================== INICIAR ===================== */
+(async function init(){
+  if (!DAYS.some(d => d[0] === state.cur)) state.cur = 'seg';
+  buildCampos(); buildBoxes(); refreshTabs(); fillCampos(); showStage();
+  try { await document.fonts.ready; } catch(e) {}
+  await ensureFont();
+  await loadAllImages();
+  refreshTabs(); showStage();
+})();
+</script>
+</body>
+</html>
