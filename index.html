@@ -7,7 +7,7 @@
 <title>Devocionais Kids</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@500;600&family=Fjalla+One&family=Amatic+SC:wght@700&family=Patrick+Hand+SC&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Kaushan+Script&family=Permanent+Marker&family=Caveat+Brush&family=Oswald:wght@500;600&family=Fjalla+One&family=Amatic+SC:wght@700&family=Patrick+Hand+SC&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
   --azul:#1d3c96; --azul-esc:#142c70; --verde:#3cc93c; --verde-esc:#2aa52a;
@@ -24,6 +24,12 @@ main{max-width:560px;margin:0 auto;padding:12px 16px 120px}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:0 0 auto;border:2px solid var(--borda);background:#fff;color:var(--txt);border-radius:999px;padding:7px 13px;font:800 14px "Nunito";position:relative;cursor:pointer}
 .tab.on{background:var(--verde);border-color:var(--verde);color:#fff}
+.tab small{display:block;font-size:10px;font-weight:700;opacity:.75;line-height:1}
+.box.auto{border-color:rgba(60,201,60,.8)}
+.box.auto .tag{background:rgba(42,165,42,.9)}
+.semana{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.semana input[type=date]{flex:1;min-width:150px;border:2px solid var(--borda);border-radius:12px;padding:9px 10px;font:700 15px "Nunito";color:var(--txt);background:#fbfcff}
+.auto-info{background:#eafbea;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;color:var(--verde-esc);margin-bottom:6px}
 .tab .dot{position:absolute;top:-3px;right:-3px;width:11px;height:11px;border-radius:50%;background:var(--laranja);border:2px solid #fff;display:none}
 .tab.temimg .dot{display:block;background:var(--azul)}
 .tab.pronto .dot{display:block;background:var(--verde-esc)}
@@ -91,6 +97,17 @@ details[open] summary::after{content:" ▴"}
 </header>
 
 <main>
+  <div class="card">
+    <h2>Semana</h2>
+    <div class="semana">
+      <label class="campo" style="margin:0;flex-basis:100%">Segunda-feira desta semana</label>
+      <input type="date" id="inSemana">
+      <button class="btn sec peq" id="btnSemanaAtual">Esta semana</button>
+      <button class="btn sec peq" id="btnProxSemana">Próxima ›</button>
+    </div>
+    <label class="check"><input type="checkbox" id="chkAuto"> Escrever dia e data na arte automaticamente</label>
+  </div>
+
   <div class="tabs" id="tabs"></div>
 
   <!-- PRÉVIA -->
@@ -118,6 +135,7 @@ details[open] summary::after{content:" ▴"}
   <!-- TEXTOS -->
   <div class="card">
     <h2>Textos do dia</h2>
+    <div class="auto-info" id="autoInfo"></div>
     <div id="campos"></div>
   </div>
 
@@ -135,6 +153,8 @@ details[open] summary::after{content:" ▴"}
         </div>
         <span>Cor</span>
         <div class="cores" id="cores"></div>
+        <span>Fonte</span>
+        <select id="selFonteBox"></select>
       </div>
     </div>
     <div class="row" style="margin-top:14px">
@@ -179,7 +199,14 @@ const FIELDS = [
   {k:'exp',   label:'Explicação (balão verde)', tag:'Explicação', ph:'Ex.: Não buscar reconhecimento em tudo que fazemos...', rows:3},
   {k:'prat',  label:'Praticando',               tag:'Praticando', ph:'Ex.: Reflita, estou fazendo isso para servir ou para ser reconhecida?', rows:3},
 ];
+const AUTO = [
+  {k:'dia',  tag:'Dia (auto)'},
+  {k:'data', tag:'Data (auto)'},
+];
+const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 const DEFAULT_BOXES = {
+  dia:   {x:.10, y:.035,w:.52, h:.13,  size:.12,  color:'#3cc93c', align:'center', rot:-3, font:'Kaushan Script'},
+  data:  {x:.765,y:.035,w:.155,h:.155, size:.075, color:'#3cc93c', align:'center', rot:0,  font:'Permanent Marker'},
   ref:   {x:.19, y:.195, w:.31, h:.045, size:.034, color:'#e0661f', align:'center', rot:0},
   verso: {x:.11, y:.245, w:.38, h:.165, size:.028, color:'#1b1b1b', align:'left',   rot:0},
   exp:   {x:.45, y:.335, w:.45, h:.135, size:.033, color:'#ffffff', align:'left',   rot:0},
@@ -187,6 +214,9 @@ const DEFAULT_BOXES = {
 };
 const FONTS = {
   'Bebas Neue':{w:400, lh:1.08},
+  'Kaushan Script':{w:400, lh:1.1},
+  'Permanent Marker':{w:400, lh:0.95},
+  'Caveat Brush':{w:400, lh:0.95},
   'Oswald':{w:600, lh:1.15},
   'Fjalla One':{w:400, lh:1.15},
   'Amatic SC':{w:700, lh:1.0},
@@ -198,13 +228,27 @@ const LS_KEY = 'devocionais-kids-v1';
 
 /* ===================== ESTADO ===================== */
 const clone = o => JSON.parse(JSON.stringify(o));
-let state = { font:'Bebas Neue', upper:true, cur:'seg', days:{} };
+const pad = n => String(n).padStart(2, '0');
+const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+function segundaDe(d){ const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return x; }
+let state = { font:'Bebas Neue', upper:true, cur:'seg', days:{}, auto:true, weekStart:toISO(segundaDe(new Date())) };
 try { const s = JSON.parse(localStorage.getItem(LS_KEY)); if (s && s.days) state = Object.assign(state, s); } catch(e) {}
+function dataDoDia(k){
+  const [y, m, d] = state.weekStart.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setDate(dt.getDate() + DAYS.findIndex(x => x[0] === k));
+  return dt;
+}
+function textoAuto(k, campo){
+  if (campo === 'dia') return DAYS.find(x => x[0] === k)[1];
+  const dt = dataDoDia(k);
+  return pad(dt.getDate()) + '\n' + MESES[dt.getMonth()];
+}
 function save(){ try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e) {} }
 function day(d = state.cur){
   if (!state.days[d]) state.days[d] = { texts:{}, boxes:clone(DEFAULT_BOXES) };
   const dd = state.days[d];
-  for (const f of FIELDS) if (!dd.boxes[f.k]) dd.boxes[f.k] = clone(DEFAULT_BOXES[f.k]);
+  for (const k in DEFAULT_BOXES) if (!dd.boxes[k]) dd.boxes[k] = clone(DEFAULT_BOXES[k]);
   return dd;
 }
 let selected = null;
@@ -235,8 +279,8 @@ async function loadAllImages(){
 const $ = id => document.getElementById(id);
 const cv = $('cv'), ctx = cv.getContext('2d');
 
-function fontSpec(px){ const f = FONTS[state.font] || {w:400}; return `${f.w} ${px}px "${state.font}", sans-serif`; }
-function lineH(){ return (FONTS[state.font] || {lh:1.12}).lh; }
+function fontSpec(px, fam = state.font){ const f = FONTS[fam] || {w:400}; return `${f.w} ${px}px "${fam}", sans-serif`; }
+function lineH(fam = state.font){ return (FONTS[fam] || {lh:1.12}).lh; }
 
 function wrap(c, text, maxW){
   const out = [];
@@ -253,15 +297,16 @@ function wrap(c, text, maxW){
   return out;
 }
 
-function drawBox(c, text, b, W, H){
-  if (state.upper) text = text.toLocaleUpperCase('pt-BR');
+function drawBox(c, text, b, W, H, upper = state.upper){
+  if (upper) text = text.toLocaleUpperCase('pt-BR');
+  const fam = b.font || state.font;
   const bw = b.w * W, bh = b.h * H;
   let size = b.size * W, lines;
   for (let i = 0; i < 80; i++){
-    c.font = fontSpec(size);
+    c.font = fontSpec(size, fam);
     lines = wrap(c, text, bw);
     const maxLine = Math.max(...lines.map(l => c.measureText(l).width));
-    if ((lines.length * size * lineH() <= bh && maxLine <= bw) || size < 6) break;
+    if ((lines.length * size * lineH(fam) <= bh && maxLine <= bw) || size < 6) break;
     size *= 0.95;
   }
   c.save();
@@ -270,7 +315,7 @@ function drawBox(c, text, b, W, H){
   c.fillStyle = b.color;
   c.textBaseline = 'middle';
   c.textAlign = b.align;
-  const lh = size * lineH();
+  const lh = size * lineH(fam);
   let y = -(lines.length * lh)/2 + lh/2;
   const x = b.align === 'left' ? -bw/2 : b.align === 'right' ? bw/2 : 0;
   for (const l of lines){ c.fillText(l, x, y); y += lh; }
@@ -281,6 +326,7 @@ function render(c, img, d, W, H){
   c.clearRect(0, 0, W, H);
   c.drawImage(img, 0, 0, W, H);
   const dd = day(d);
+  if (state.auto) for (const a of AUTO) drawBox(c, textoAuto(d, a.k), dd.boxes[a.k], W, H, false);
   for (const f of FIELDS){
     const t = (dd.texts[f.k] || '').trim();
     if (t) drawBox(c, t, dd.boxes[f.k], W, H);
@@ -304,9 +350,9 @@ function redraw(){
 const layer = $('layer');
 function buildBoxes(){
   layer.innerHTML = '';
-  for (const f of FIELDS){
+  for (const f of [...AUTO, ...FIELDS]){
     const el = document.createElement('div');
-    el.className = 'box'; el.dataset.k = f.k;
+    el.className = 'box' + (AUTO.includes(f) ? ' auto' : ''); el.dataset.k = f.k;
     el.innerHTML = `<div class="tag">${f.tag}</div><div class="handle"></div>`;
     layer.appendChild(el);
   }
@@ -320,6 +366,7 @@ function positionBoxes(){
     el.style.width = (b.w*100)+'%'; el.style.height = (b.h*100)+'%';
     el.style.transform = `rotate(${b.rot}deg)`;
     el.classList.toggle('sel', el.dataset.k === selected);
+    if (el.classList.contains('auto')) el.style.display = state.auto ? '' : 'none';
   });
 }
 
@@ -358,7 +405,7 @@ function select(k){
   document.querySelectorAll('#campos textarea').forEach(t => t.classList.toggle('ativo', t.dataset.k === k));
   $('painelSel').classList.toggle('hidden', !k);
   $('semSel').classList.toggle('hidden', !!k);
-  $('nomeSel').textContent = k ? FIELDS.find(f => f.k === k).tag : '';
+  $('nomeSel').textContent = k ? [...AUTO, ...FIELDS].find(f => f.k === k).tag : '';
   if (k) syncPanel();
 }
 function syncPanel(){
@@ -367,7 +414,13 @@ function syncPanel(){
   $('segAlign').querySelectorAll('button').forEach(bt => bt.classList.toggle('on', bt.dataset.a === b.align));
   $('cores').querySelectorAll('.cor').forEach(c => c.classList.toggle('on', c.dataset.c.toLowerCase() === b.color.toLowerCase()));
   $('corLivre').value = b.color;
+  $('selFonteBox').value = b.font || '';
 }
+(function buildFonteBox(){
+  const s = $('selFonteBox');
+  s.innerHTML = '<option value="">Fonte geral</option>' + Object.keys(FONTS).map(f => `<option value="${f}">${f}</option>`).join('');
+  s.addEventListener('change', async () => { await ensureFont(); setProp('font', s.value || undefined); });
+})();
 function setProp(p, v){ if (!selected) return; day().boxes[selected][p] = v; positionBoxes(); syncPanel(); redraw(); save(); }
 
 $('rSize').addEventListener('input', e => setProp('size', +e.target.value));
@@ -394,6 +447,9 @@ function buildCampos(){
 }
 function fillCampos(){
   const dd = day();
+  const dt = dataDoDia(state.cur);
+  $('autoInfo').classList.toggle('hidden', !state.auto);
+  $('autoInfo').textContent = `✨ Automático: ${dayLabel(state.cur)} · ${pad(dt.getDate())} ${MESES[dt.getMonth()]}`;
   for (const f of FIELDS) $('t_'+f.k).value = dd.texts[f.k] || '';
 }
 
@@ -404,13 +460,15 @@ function refreshTabs(){
   if (!tabs.children.length){
     for (const [k, n] of DAYS){
       const b = document.createElement('button'); b.className = 'tab'; b.dataset.k = k;
-      b.innerHTML = `${n}<span class="dot"></span>`;
+      b.innerHTML = `${n}<small></small><span class="dot"></span>`;
       b.onclick = () => switchDay(k);
       tabs.appendChild(b);
     }
   }
   tabs.querySelectorAll('.tab').forEach(b => {
     const k = b.dataset.k, dd = state.days[k];
+    const dt = dataDoDia(k);
+    b.querySelector('small').textContent = `${pad(dt.getDate())}/${pad(dt.getMonth()+1)}`;
     const temTexto = dd && FIELDS.some(f => (dd.texts[f.k] || '').trim());
     b.classList.toggle('on', k === state.cur);
     b.classList.toggle('temimg', !!imgs[k] && !temTexto);
@@ -492,8 +550,31 @@ $('mostrarCaixas').addEventListener('change', e => layer.classList.toggle('ocult
   $('chkUpper').addEventListener('change', e => { state.upper = e.target.checked; save(); redraw(); });
 })();
 async function ensureFont(){
-  try { await document.fonts.load(fontSpec(40)); } catch(e) {}
+  try { await Promise.all(Object.keys(FONTS).map(f => document.fonts.load(fontSpec(40, f)))); } catch(e) {}
 }
+
+/* ===================== SEMANA / AUTOMÁTICO ===================== */
+function aplicarSemana(){
+  $('inSemana').value = state.weekStart;
+  save(); refreshTabs(); fillCampos(); redraw();
+}
+$('inSemana').addEventListener('change', e => {
+  if (!e.target.value) return;
+  const [y, m, d] = e.target.value.split('-').map(Number);
+  const seg = segundaDe(new Date(y, m - 1, d));
+  if (seg.getDate() !== d) toast('Ajustei para a segunda-feira dessa semana');
+  state.weekStart = toISO(seg);
+  aplicarSemana();
+});
+$('btnSemanaAtual').onclick = () => { state.weekStart = toISO(segundaDe(new Date())); aplicarSemana(); };
+$('btnProxSemana').onclick = () => { const d = dataDoDia('seg'); d.setDate(d.getDate() + 7); state.weekStart = toISO(d); aplicarSemana(); };
+$('chkAuto').checked = state.auto;
+$('chkAuto').addEventListener('change', e => {
+  state.auto = e.target.checked;
+  if (!state.auto && (selected === 'dia' || selected === 'data')) select(null);
+  save(); positionBoxes(); fillCampos(); redraw();
+});
+$('inSemana').value = state.weekStart;
 
 /* ===================== EXPORTAR ===================== */
 function feedCanvas(){
